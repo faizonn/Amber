@@ -1,4 +1,11 @@
+import basic
+
+
 #Read input From Terminal Window
 while True:
     text = input('basic > ')
-    print(text)
+    result, error = basic.run(text)
+
+    if error: print(error.as_string())
+    else: print(result)
+ 
