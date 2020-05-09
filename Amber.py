@@ -24,7 +24,7 @@ class Error:
         self.pos_end = pos_end
         self.error_name =error_name
         self.details = details
-   
+
     def as_string(self):
         result = f'{self.error_name}: {self.details} \n'
         result += f'File {self.pos_start.fn}, line{self.pos_start.ln + 1}'
@@ -44,7 +44,7 @@ class InvalidSyntaxError(Error):
 
 
 ###################################
-# Position 
+# Position
 #Keep track of line
 #number, column number, and index
 ###################################
@@ -52,21 +52,21 @@ class InvalidSyntaxError(Error):
 class Position:
     def __init__(self,idx, ln,col, fn, ftxt):
         self.idx = idx
-        self.ln = ln 
+        self.ln = ln
         self.col = col
         self.fn = fn
         self.ftxt = ftxt
-    
+
     def advance(self,current_char = None):
         self.idx += 1
         self.col += 1
-        
+
         if current_char == '\n':
             self.ln += 1
             self.col = 0
-        
+
         return self
-    
+
     def copy(self):
         return Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
 
@@ -152,7 +152,7 @@ class Lexer:
                 self.advance()
             else:
                 pos_start = self.pos.copy()
-                char = self.current_char 
+                char = self.current_char
                 self.advance()
                 return[], IllegalCharError(pos_start, self.pos, "'" + char + "'" )
 
@@ -160,7 +160,7 @@ class Lexer:
         return tokens, None
 
     #Since a character can be more than one number we use this func to create numbers
-    def make_number(self): 
+    def make_number(self):
         num_str = ''
         dot_count = 0 #Floating points
         pos_start = self.pos.copy()
@@ -173,7 +173,7 @@ class Lexer:
             else:
                 num_str += self.current_char
             self.advance()
-        
+
         if dot_count == 0:
             return Token(TT_INT, int(num_str),pos_start, self.pos) # return int and convert strint to a int
         else:
@@ -186,7 +186,7 @@ class Lexer:
 class NumberNode:
     def __init__(self,tok):
         self.tok =tok
-    
+
     def __repr__(self):
         return f'{self.tok}'
 
@@ -208,7 +208,7 @@ class UnaryOpNode:
 		return f'({self.op_tok}, {self.node})'
 
 ####################################
-#Parse Result 
+#Parse Result
 #keep track of syntax error if there is one
 #Keep track of node
 ####################################
@@ -222,7 +222,7 @@ class ParseResult:
         if isinstance(res,ParseResult):
             if res.error: self.error =res.error
             return res.node
-        
+
         return res
 
     def success(self,node):
@@ -248,7 +248,7 @@ class Parser:
         if self.tok_idx <len(self.tokens):
             self.current_tok = self.tokens[self.tok_idx]
         return self.current_tok
-    
+
     def parse(self):
         res = self.expr()
         if not res.error and self.current_tok.type != TT_EOF:
@@ -268,7 +268,7 @@ class Parser:
             factor = res.register(self.factor())
             if res.error: return res
             return res.success(UnaryOpNode(tok, factor))
-        
+
         elif tok.type in (TT_INT, TT_FLOAT):
             res.register(self.advance())
             return res.success(NumberNode(tok))
@@ -302,7 +302,7 @@ class Parser:
     def bin_op(self, func, ops):
         res = ParseResult()
         left = res.register(func())
-        if res.error: return res 
+        if res.error: return res
 
         while self.current_tok.type in ops:
            op_tok = self.current_tok
@@ -310,8 +310,8 @@ class Parser:
            right = res.register(func())
            if res.error:return res
            left = BinOpNode(left, op_tok, right)
-        
-        return res.success(left)    
+
+        return res.success(left)
 ################################
 #RUN
 ####################################
